@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0910">
+<title>Meine Wunschliste</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0910; --card:#15111d; --card2:#1b1626; --ink:#f1ecfa; --muted:#a79bbd; --line:#2a2238;
+    --accent:#a855f7; --accent2:#c084fc; --accent-deep:#6d28d9; --accent-soft:rgba(168,85,247,.16);
+    --ok:#4ade80; --radius:18px;
+    --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html{background:var(--bg)}
+  body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(124,58,237,.28), transparent 60%),
+      radial-gradient(700px 500px at 100% 10%, rgba(192,132,252,.14), transparent 60%),
+      radial-gradient(800px 600px at 50% 110%, rgba(109,40,217,.18), transparent 60%),
+      var(--bg);
+    background-attachment:fixed;overflow-x:hidden}
+  /* twinkling stars */
+  .sky{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .sky i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.5;animation:tw 4s ease-in-out infinite}
+  .sky i.b{width:3px;height:3px;box-shadow:0 0 8px 2px rgba(192,132,252,.7);background:#e9d5ff}
+  @keyframes tw{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:.9;transform:scale(1.2)}}
+  @media (prefers-reduced-motion:reduce){.sky i{animation:none}}
+
+  .wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:48px 20px 80px}
+  header{text-align:center;margin-bottom:26px;position:relative}
+  .emblem{width:78px;height:78px;margin:0 auto;display:grid;place-items:center;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #c084fc, #6d28d9 70%);box-shadow:0 0 0 6px rgba(168,85,247,.12),0 0 40px rgba(168,85,247,.55);font-size:36px;animation:float 5s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .spark{position:absolute;color:var(--accent2);font-size:18px;opacity:.85;animation:tw 3s ease-in-out infinite}
+  h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(34px,6.5vw,58px);margin:18px 0 6px;letter-spacing:-.01em;
+    background:linear-gradient(100deg,#fff 10%,#e9d5ff 40%,#c084fc 70%,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .divider{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--accent2);margin:6px 0 12px;font-size:13px;letter-spacing:.3em}
+  .divider::before,.divider::after{content:"";height:1px;width:70px;background:linear-gradient(90deg,transparent,var(--accent))}
+  .divider::after{background:linear-gradient(90deg,var(--accent),transparent)}
+  .intro{color:var(--muted);max-width:520px;margin:0 auto;white-space:pre-line}
+  .editable{cursor:text;border-radius:8px;outline:none;padding:2px 6px}
+  .is-owner:not(.preview) .editable:hover{background:rgba(255,255,255,.04)}
+  .is-owner .editable:focus{background:rgba(255,255,255,.06);box-shadow:0 0 0 2px var(--accent-soft)}
+  h1.editable:focus{-webkit-text-fill-color:var(--ink)}
+
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:28px 0 18px}
+  .bar .left,.bar .right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{border:1px solid var(--line);background:rgba(21,17,29,.8);border-radius:999px;padding:7px 14px;font:500 14px Inter,sans-serif;color:var(--muted);cursor:pointer;transition:all .15s}
+  .chip:hover{color:var(--ink);border-color:#3b2f52}
+  .chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(168,85,247,.35)}
+  .btn{border:0;border-radius:999px;padding:10px 18px;font:600 15px Inter,sans-serif;cursor:pointer;color:#fff;
+    background:linear-gradient(135deg,#c084fc,#7c3aed);box-shadow:0 4px 18px rgba(168,85,247,.4);transition:transform .15s,box-shadow .15s}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(168,85,247,.55)}
+  .btn:disabled{opacity:.6}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+  .count{color:var(--muted);font-size:14px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+  .card{position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+  .card:hover{transform:translateY(-3px);border-color:rgba(168,85,247,.5);box-shadow:var(--shadow),0 0 30px rgba(168,85,247,.18)}
+  .thumb{position:relative;height:104px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-family:Fraunces,serif;font-size:44px;font-weight:700;color:rgba(255,255,255,.95);overflow:hidden}
+  .thumb::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(2px 2px at 20% 30%,rgba(255,255,255,.8),transparent),
+    radial-gradient(1.5px 1.5px at 70% 20%,rgba(255,255,255,.7),transparent),
+    radial-gradient(1.5px 1.5px at 85% 70%,rgba(255,255,255,.6),transparent),
+    radial-gradient(2px 2px at 45% 75%,rgba(255,255,255,.5),transparent)}
+  /* ribbon */
+  .thumb::after{content:"";position:absolute;top:0;bottom:0;right:64px;width:12px;background:rgba(255,255,255,.14)}
+  .thumb > *{position:relative;z-index:1}
+  .thumb .shop{font:600 11px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);padding:4px 10px;border-radius:999px;color:#fff;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .title{font-weight:600;font-size:17px;line-height:1.3;word-break:break-word}
+  .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+  .price{color:var(--ink);font-weight:600}
+  .hearts{color:var(--accent2);letter-spacing:1px;text-shadow:0 0 10px rgba(192,132,252,.6)}
+  .note{font-size:14px;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:8px 10px;white-space:pre-line;word-break:break-word}
+  .actions{display:flex;gap:8px;margin-top:auto;padding-top:8px;align-items:center}
+  .actions a.go{flex:1;text-align:center;text-decoration:none;color:#fff;border-radius:999px;padding:9px 12px;font-weight:600;font-size:14px;
+    background:linear-gradient(135deg,rgba(168,85,247,.25),rgba(109,40,217,.25));border:1px solid rgba(168,85,247,.45);transition:all .15s}
+  .actions a.go:hover{background:linear-gradient(135deg,#a855f7,#6d28d9);border-color:transparent}
+  .icon-btn{border:1px solid var(--line);background:transparent;border-radius:999px;width:38px;height:38px;cursor:pointer;font-size:15px;color:var(--ink)}
+  .icon-btn:hover{background:rgba(255,255,255,.06)}
+  .card.done{opacity:.5}
+  .card.done .title{text-decoration:line-through}
+  .badge{font-size:12px;font-weight:600;background:var(--accent-soft);color:var(--accent2);padding:2px 8px;border-radius:999px;border:1px solid rgba(168,85,247,.3)}
+  .badge.ok{background:rgba(74,222,128,.1);color:var(--ok);border-color:rgba(74,222,128,.3)}
+  .card.heart{border-color:rgba(168,85,247,.45)}
+  .card.heart .corner{position:absolute;top:10px;left:12px;z-index:2;font-size:14px;filter:drop-shadow(0 0 6px rgba(192,132,252,.9))}
+
+  .empty,.status{text-align:center;color:var(--muted);padding:60px 20px;background:rgba(21,17,29,.6);border:1px dashed #3b2f52;border-radius:var(--radius)}
+  .empty .big{font-size:44px}
+  .hint{font-size:13px;color:var(--muted);text-align:center;margin-top:34px;opacity:.8}
+  .ownerbar{display:none;background:rgba(21,17,29,.8);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:14px;color:var(--muted);align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+  .is-owner .ownerbar{display:flex}
+  .owner-only{display:none!important}
+  .is-owner:not(.preview) .owner-only{display:inline-flex!important}
+
+  /* dialog */
+  .overlay{position:fixed;inset:0;background:rgba(5,3,10,.7);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;z-index:10;padding:16px}
+  .overlay.open{display:flex}
+  @media(min-width:640px){.overlay{align-items:center}}
+  .dialog{background:linear-gradient(180deg,#1d1729,#14101c);border:1px solid #33284a;border-radius:22px;width:100%;max-width:480px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 50px rgba(124,58,237,.2);max-height:92vh;overflow:auto}
+  .dialog h2{font-family:Fraunces,serif;margin:0 0 16px;font-size:24px}
+  label{display:block;font-size:13px;font-weight:600;margin:12px 0 5px}
+  label .opt{font-weight:400;color:var(--muted)}
+  input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:15px Inter,sans-serif;color:var(--ink);background:#0f0c15}
+  input::placeholder,textarea::placeholder{color:#6b5f80}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  input[type=checkbox]{accent-color:var(--accent)}
+  textarea{resize:vertical;min-height:70px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .prio{display:flex;gap:6px}
+  .prio button{flex:1;border:1px solid var(--line);background:#0f0c15;color:var(--muted);border-radius:10px;padding:8px;cursor:pointer;font-size:14px}
+  .prio button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent2);font-weight:600}
+  .dialog .foot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+  .err{color:#f0abfc;font-size:13px;margin-top:8px;min-height:1em}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#a855f7,#6d28d9);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;box-shadow:0 6px 24px rgba(168,85,247,.5)}
+  .toast.show{opacity:1}
+  footer{text-align:center;margin-top:16px;color:#4b3f60;font-size:18px;letter-spacing:.5em}
+  .adminlink{display:inline-block;margin-top:14px;color:#5b4d72;font-size:12px;text-decoration:none;letter-spacing:.02em}
+  .adminlink:hover{color:var(--accent2)}
+  .help{font-size:13px;color:var(--muted);margin:0 0 4px}
+  .help a{color:var(--accent2)}
+</style>
+</head>
+<body>
+<div class="sky" id="sky" aria-hidden="true"></div>
+<div class="wrap" id="app">
+  <header>
+    <span class="spark" style="left:18%;top:10px">✦</span>
+    <span class="spark" style="right:20%;top:40px;animation-delay:1.2s;font-size:13px">✧</span>
+    <span class="spark" style="left:28%;top:90px;animation-delay:.6s;font-size:11px">✦</span>
+    <span class="spark" style="right:12%;top:120px;animation-delay:2s">✧</span>
+    <div class="emblem">🎁</div>
+    <h1 id="listTitle" class="editable" spellcheck="false">Meine Wunschliste</h1>
+    <div class="divider">✦ ✦ ✦</div>
+    <p id="listIntro" class="intro editable">Kleine und große Wünsche – für jeden Anlass.</p>
+  </header>
+
+  <div class="ownerbar" id="ownerbar">
+    <span id="ownerMsg">✏️ Bearbeitungsmodus. Titel und Text oben kannst du direkt anklicken und ändern.</span>
+    <button class="chip" id="previewBtn" aria-pressed="false">👀 Ansicht wie Gäste</button>
+  </div>
+
+  <div class="bar">
+    <div class="left" id="sorts">
+      <button class="chip" data-sort="prio" aria-pressed="true">Liebste zuerst</button>
+      <button class="chip" data-sort="cheap" aria-pressed="false">Preis ↑</button>
+      <button class="chip" data-sort="new" aria-pressed="false">Neueste</button>
+    </div>
+    <div class="right">
+      <span class="count" id="count"></span>
+      <button class="btn owner-only" id="addBtn">+ Wunsch hinzufügen</button>
+    </div>
+  </div>
+
+  <div id="list"><div class="status">Wünsche werden geladen …</div></div>
+
+  <p class="hint">Tipp: Klick auf „Ansehen“, um direkt zum Shop zu kommen.</p>
+  <footer>✦ ✧ ✦</footer>
+  <div style="text-align:center"><a href="#bearbeiten" class="adminlink" id="adminLink">Bearbeiten</a></div>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <form class="dialog" id="form" novalidate>
+    <h2 id="formTitle">Neuer Wunsch</h2>
+    <label for="fUrl">Link <span class="opt">(z. B. aus dem Online-Shop)</span></label>
+    <input id="fUrl" type="url" placeholder="https://…" autocomplete="off">
+    <label for="fTitle">Was wünschst du dir?</label>
+    <input id="fTitle" type="text" maxlength="140" placeholder="z. B. Kuschelige Decke in Salbeigrün" required>
+    <div class="row">
+      <div>
+        <label for="fPrice">Preis <span class="opt">(ca., optional)</span></label>
+        <input id="fPrice" type="text" inputmode="decimal" placeholder="z. B. 29,90">
+      </div>
+      <div>
+        <label>Wie sehr?</label>
+        <div class="prio" id="fPrio">
+          <button type="button" data-p="1" title="Wäre nett">♥</button>
+          <button type="button" data-p="2" title="Freue mich sehr">♥♥</button>
+          <button type="button" data-p="3" title="Herzenswunsch">♥♥♥</button>
+        </div>
+      </div>
+    </div>
+    <label for="fNote">Notiz <span class="opt">(Größe, Farbe, Variante … optional)</span></label>
+    <textarea id="fNote" maxlength="500" placeholder="z. B. Größe M, am liebsten in Blau"></textarea>
+    <label class="owner-edit-only" id="doneWrap" style="display:none;align-items:center;gap:8px;font-weight:500">
+      <input type="checkbox" id="fDone" style="width:auto"> Schon bekommen (für Gäste ausblenden)
+    </label>
+    <div class="err" id="fErr"></div>
+    <div class="foot">
+      <button type="button" class="btn ghost" id="cancelBtn">Abbrechen</button>
+      <button type="submit" class="btn" id="saveBtn">Speichern</button>
+    </div>
+  </form>
+</div>
+
+<div class="overlay" id="confirmOverlay" role="dialog" aria-modal="true">
+  <div class="dialog">
+    <h2>Wunsch löschen?</h2>
+    <p id="confirmText" style="color:var(--muted);margin:0"></p>
+    <div class="foot">
+      <button class="btn ghost" id="confirmNo">Behalten</button>
+      <button class="btn" id="confirmYes">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="adminOverlay" role="dialog" aria-modal="true">
+  <form class="dialog" id="adminForm" novalidate>
+    <h2>Liste bearbeiten</h2>
+    <p class="help">Nur für dich: Verbinde die Seite einmalig mit deinem GitHub-Schlüssel. Er bleibt nur in diesem Browser gespeichert.</p>
+    <label for="aRepo">Repository</label>
+    <input id="aRepo" type="text" placeholder="benutzername/wunschliste" autocomplete="off" spellcheck="false">
+    <label for="aToken">GitHub-Schlüssel (Token)</label>
+    <input id="aToken" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+    <div class="err" id="aErr"></div>
+    <div class="foot">
+      <button type="button" class="btn ghost" id="aCancel">Abbrechen</button>
+      <button type="submit" class="btn" id="aSave">Verbinden</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const app = $('app');
+  const listEl = $('list');
+  const TOKEN_KEY = 'wishlist.gh.token';
+  const REPO_KEY = 'wishlist.gh.repo';
+  const FILE = 'wishes.json';
+
+  let state = { title: 'Meine Wunschliste', intro: 'Kleine und große Wünsche – für jeden Anlass.', items: [] };
+  let isOwner = false, preview = false, loaded = false;
+  let sortMode = 'prio', editingId = null, prioValue = 2;
+  let gh = null; // {token, owner, repo, branch}
+
+  // ---------- helpers ----------
+  const palette = ['#7c3aed','#a855f7','#6d28d9','#9333ea','#c026d3','#4c1d95','#8b5cf6','#5b21b6'];
+  function colorFor(str){ let h=0; for(const c of str) h=(h*31+c.charCodeAt(0))>>>0; return palette[h%palette.length]; }
+  function domainOf(url){ try{ return new URL(url).hostname.replace(/^www\./,''); }catch{ return ''; } }
+  function safeUrl(url){ try{ const u=new URL(url); return (u.protocol==='http:'||u.protocol==='https:')?u.href:''; }catch{ return ''; } }
+  function parsePrice(s){ if(s==null||s==='') return null; const n=parseFloat(String(s).replace(/[^\d,.-]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.')); return isFinite(n)?n:null; }
+  function fmtPrice(n){ return n==null?'':n.toLocaleString('de-DE',{style:'currency',currency:'EUR'}); }
+  function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2600); }
+  function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+  function showStatus(msg){ listEl.innerHTML=''; listEl.appendChild(el('div','status',msg)); }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+  const store = {
+    get(k){ try{ return localStorage.getItem(k); }catch{ return null; } },
+    set(k,v){ try{ localStorage.setItem(k,v); }catch{} },
+    del(k){ try{ localStorage.removeItem(k); }catch{} },
+  };
+  function b64encode(str){ const bytes=new TextEncoder().encode(str); let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b)); return btoa(bin); }
+  function b64decode(b64){ const bin=atob(b64.replace(/\n/g,'')); return new TextDecoder().decode(Uint8Array.from(bin,c=>c.charCodeAt(0))); }
+
+  // Guess "owner/repo" from the GitHub Pages address
+  function guessRepo(){
+    const h = location.hostname, m = h.match(/^([^.]+)\.github\.io$/i);
+    if(!m) return '';
+    const first = location.pathname.split('/').filter(Boolean)[0];
+    return first && !/\.html?$/.test(first) ? `${m[1]}/${first}` : `${m[1]}/${h}`;
+  }
+
+  // ---------- GitHub API ----------
+  async function ghFetch(path, opts={}){
+    const res = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}${path}`, {
+      ...opts,
+      headers: { 'Accept':'application/vnd.github+json', 'Authorization':`Bearer ${gh.token}`, 'X-GitHub-Api-Version':'2022-11-28', ...(opts.headers||{}) },
+    });
+    return res;
+  }
+  async function ghReadFile(){
+    const res = await ghFetch(`/contents/${FILE}?ref=${encodeURIComponent(gh.branch)}&t=${Date.now()}`);
+    if(res.status===404) return { sha:null, data:null };
+    if(!res.ok) throw new Error('read '+res.status);
+    const j = await res.json();
+    return { sha:j.sha, data: JSON.parse(b64decode(j.content)) };
+  }
+  let saving = false, dirty = false;
+  async function persist(message){
+    if(!gh){ toast('Nicht verbunden'); return; }
+    if(saving){ dirty = true; return; }
+    saving = true;
+    try{
+      do{
+        dirty = false;
+        const { sha } = await ghReadFile();
+        const body = { message: message || 'Wunschliste aktualisiert', content: b64encode(JSON.stringify(state, null, 2)+'\n'), branch: gh.branch };
+        if(sha) body.sha = sha;
+        const res = await ghFetch(`/contents/${FILE}`, { method:'PUT', body: JSON.stringify(body) });
+        if(!res.ok) throw new Error('write '+res.status);
+      } while(dirty);
+      toast('Gespeichert ✓ – für Gäste in ca. 1 Min. sichtbar');
+    }catch(err){
+      toast('Speichern fehlgeschlagen. Prüfe deinen Schlüssel.');
+      console.error(err);
+    }finally{ saving = false; }
+  }
+
+  // ---------- render ----------
+  function render(){
+    if(!loaded) return;
+    $('listTitle').textContent = state.title || 'Meine Wunschliste';
+    document.title = state.title || 'Meine Wunschliste';
+    if(document.activeElement!==$('listIntro')) $('listIntro').textContent = state.intro || '';
+    const ownerView = isOwner && !preview;
+    let visible = state.items.filter(i => ownerView || !i.done);
+    const byPrio = (a,b) => (b.priority||0)-(a.priority||0) || (b.createdAt||0)-(a.createdAt||0);
+    if(sortMode==='prio') visible.sort(byPrio);
+    else if(sortMode==='cheap') visible.sort((a,b)=> (a.price??Infinity)-(b.price??Infinity) || byPrio(a,b));
+    else visible.sort((a,b)=> (b.createdAt||0)-(a.createdAt||0));
+    if(ownerView) visible.sort((a,b)=> (a.done?1:0)-(b.done?1:0));
+
+    const open = state.items.filter(i=>!i.done).length;
+    $('count').textContent = open===1 ? '1 Wunsch' : open + ' Wünsche';
+
+    listEl.innerHTML='';
+    if(!visible.length){
+      const e = el('div','empty');
+      e.appendChild(el('div','big','🌟'));
+      e.appendChild(el('p',null, ownerView ? 'Noch keine Wünsche. Füge deinen ersten mit „+ Wunsch hinzufügen“ hinzu!' : 'Hier sind gerade noch keine Wünsche eingetragen.'));
+      listEl.appendChild(e); return;
+    }
+    const grid = el('div','grid');
+    for(const it of visible){
+      const card = el('article','card'+(it.done?' done':'')+(it.priority===3?' heart':''));
+      if(it.priority===3) card.appendChild(el('span','corner','✨'));
+      const dom = domainOf(it.url||'');
+      const th = el('div','thumb');
+      th.style.background = `linear-gradient(135deg, ${colorFor(dom||it.title||'x')}, ${colorFor((dom||it.title||'x')+'!')})`;
+      th.appendChild(el('span',null,(it.title||'?').trim().charAt(0).toUpperCase()));
+      if(dom) th.appendChild(el('span','shop',dom));
+      card.appendChild(th);
+      const b = el('div','body');
+      b.appendChild(el('div','title',it.title||'Ohne Titel'));
+      const meta = el('div','meta');
+      if(it.price!=null) meta.appendChild(el('span','price',fmtPrice(it.price)));
+      const hearts = el('span','hearts','♥'.repeat(it.priority||1));
+      hearts.title = ['','Wäre nett','Freue mich sehr','Herzenswunsch'][it.priority||1];
+      meta.appendChild(hearts);
+      if(it.priority===3) meta.appendChild(el('span','badge','Herzenswunsch'));
+      if(it.done) meta.appendChild(el('span','badge ok','Bekommen ✓'));
+      b.appendChild(meta);
+      if(it.note) b.appendChild(el('div','note',it.note));
+      const act = el('div','actions');
+      const href = safeUrl(it.url||'');
+      if(href){ const a=el('a','go','Ansehen ↗'); a.href=href; a.target='_blank'; a.rel='noopener noreferrer'; act.appendChild(a); }
+      else act.appendChild(el('span','count','Kein Link'));
+      if(ownerView){
+        const eb = el('button','icon-btn','✏️'); eb.title='Bearbeiten'; eb.onclick=()=>openForm(it); act.appendChild(eb);
+        const dbt = el('button','icon-btn','🗑'); dbt.title='Löschen'; dbt.onclick=()=>askDelete(it); act.appendChild(dbt);
+      }
+      b.appendChild(act);
+      card.appendChild(b);
+      grid.appendChild(card);
+    }
+    listEl.appendChild(grid);
+  }
+
+  // ---------- sorting & preview ----------
+  document.querySelectorAll('#sorts .chip').forEach(btn => btn.addEventListener('click', () => {
+    sortMode = btn.dataset.sort;
+    document.querySelectorAll('#sorts .chip').forEach(b=>b.setAttribute('aria-pressed', String(b===btn)));
+    render();
+  }));
+  $('previewBtn').addEventListener('click', () => {
+    preview = !preview;
+    $('previewBtn').setAttribute('aria-pressed', String(preview));
+    $('previewBtn').textContent = preview ? '✏️ Zurück zum Bearbeiten' : '👀 Ansicht wie Gäste';
+    app.classList.toggle('preview', preview);
+    setEditable(isOwner && !preview);
+    render();
+  });
+
+  // ---------- wish form ----------
+  function setPrio(p){ prioValue=p; document.querySelectorAll('#fPrio button').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.p===p))); }
+  document.querySelectorAll('#fPrio button').forEach(b=>b.addEventListener('click',()=>setPrio(+b.dataset.p)));
+  function openForm(it){
+    editingId = it ? it.id : null;
+    $('formTitle').textContent = it ? 'Wunsch bearbeiten' : 'Neuer Wunsch';
+    $('fUrl').value = it?.url || '';
+    $('fTitle').value = it?.title || '';
+    $('fPrice').value = it?.price!=null ? String(it.price).replace('.',',') : '';
+    $('fNote').value = it?.note || '';
+    $('fDone').checked = !!it?.done;
+    $('doneWrap').style.display = it ? 'flex' : 'none';
+    $('fErr').textContent='';
+    setPrio(it?.priority || 2);
+    $('overlay').classList.add('open');
+    setTimeout(()=>$(it?'fTitle':'fUrl').focus(),50);
+  }
+  function closeAll(){ for(const id of ['overlay','confirmOverlay','adminOverlay']) $(id).classList.remove('open'); editingId=null; }
+  $('addBtn').addEventListener('click', ()=>openForm(null));
+  $('cancelBtn').addEventListener('click', closeAll);
+  for(const id of ['overlay','confirmOverlay','adminOverlay']) $(id).addEventListener('click', e=>{ if(e.target===$(id)) closeAll(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAll(); });
+
+  $('fUrl').addEventListener('blur', () => {
+    if($('fTitle').value.trim()) return;
+    try{
+      const u = new URL($('fUrl').value.trim());
+      const seg = u.pathname.split('/').filter(s=>s && !/^(dp|p|product|products|artikel|item|s)$/i.test(s) && !/^[A-Z0-9]{8,}$/.test(s) && !/^\d+$/.test(s));
+      const best = seg.sort((a,b)=>b.length-a.length)[0];
+      if(best && best.length>3){
+        const t = decodeURIComponent(best).replace(/\.(html?|php)$/,'').replace(/[-_+]+/g,' ').trim();
+        $('fTitle').value = t.charAt(0).toUpperCase()+t.slice(1);
+      }
+    }catch{}
+  });
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const rawUrl = $('fUrl').value.trim();
+    const url = rawUrl ? safeUrl(/^https?:\/\//i.test(rawUrl)?rawUrl:'https://'+rawUrl) : '';
+    const title = $('fTitle').value.trim();
+    if(rawUrl && !url){ $('fErr').textContent='Der Link sieht nicht richtig aus.'; return; }
+    if(!title){ $('fErr').textContent='Bitte gib dem Wunsch einen Namen.'; $('fTitle').focus(); return; }
+    const data = { title, url, price: parsePrice($('fPrice').value), note: $('fNote').value.trim(), priority: prioValue, done: editingId ? $('fDone').checked : false };
+    if(editingId){
+      const i = state.items.findIndex(x=>x.id===editingId);
+      if(i>=0) state.items[i] = { ...state.items[i], ...data, updatedAt: Date.now() };
+    } else {
+      state.items.push({ id: uid(), ...data, createdAt: Date.now() });
+    }
+    const msg = editingId ? `Wunsch bearbeitet: ${title}` : `Neuer Wunsch: ${title}`;
+    closeAll(); render();
+    await persist(msg);
+  });
+
+  // ---------- delete ----------
+  let pendingDelete = null;
+  function askDelete(it){ pendingDelete=it; $('confirmText').textContent = '„'+(it.title||'')+'“ wird endgültig entfernt.'; $('confirmOverlay').classList.add('open'); }
+  $('confirmNo').addEventListener('click', closeAll);
+  $('confirmYes').addEventListener('click', async ()=>{
+    const it = pendingDelete; closeAll();
+    if(!it) return;
+    state.items = state.items.filter(x=>x.id!==it.id);
+    render();
+    await persist(`Wunsch gelöscht: ${it.title}`);
+  });
+
+  // ---------- editable header ----------
+  function setEditable(on){ for(const id of ['listTitle','listIntro']) $(id).contentEditable = on ? 'true' : 'false'; }
+  for(const id of ['listTitle','listIntro']){
+    $(id).addEventListener('blur', async ()=>{
+      if(!isOwner || preview) return;
+      const title = $('listTitle').textContent.trim() || 'Meine Wunschliste';
+      const intro = $('listIntro').textContent.trim();
+      if(title===state.title && intro===state.intro) return;
+      state.title = title; state.intro = intro;
+      await persist('Titel/Text geändert');
+    });
+    $(id).addEventListener('keydown', e=>{ if(id==='listTitle' && e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+  }
+
+  // ---------- admin login ----------
+  function openAdmin(){
+    $('aRepo').value = store.get(REPO_KEY) || guessRepo();
+    $('aToken').value = '';
+    $('aErr').textContent = '';
+    $('adminOverlay').classList.add('open');
+    setTimeout(()=>$('aToken').focus(),50);
+  }
+  $('adminLink').addEventListener('click', (e)=>{ e.preventDefault(); isOwner ? logout() : openAdmin(); });
+  $('aCancel').addEventListener('click', closeAll);
+  function logout(){
+    store.del(TOKEN_KEY); gh=null; isOwner=false; preview=false;
+    app.classList.remove('is-owner','preview'); setEditable(false);
+    $('adminLink').textContent = 'Bearbeiten';
+    toast('Abgemeldet'); render();
+  }
+  async function connect(token, repoStr){
+    const [owner, repo] = (repoStr||'').split('/').map(s=>s && s.trim());
+    if(!owner || !repo) throw new Error('repo');
+    gh = { token, owner, repo, branch: 'main' };
+    const r = await ghFetch('');
+    if(!r.ok){ gh=null; throw new Error(r.status===404||r.status===401 ? 'auth' : 'net'); }
+    const info = await r.json();
+    if(!info.permissions?.push){ gh=null; throw new Error('perm'); }
+    gh.branch = info.default_branch || 'main';
+    const { data } = await ghReadFile();
+    if(data) state = normalize(data);
+    isOwner = true; loaded = true;
+    app.classList.add('is-owner'); setEditable(!preview);
+    $('adminLink').textContent = 'Abmelden';
+    render();
+  }
+  $('adminForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const token = $('aToken').value.trim(), repo = $('aRepo').value.trim();
+    if(!token){ $('aErr').textContent='Bitte füge deinen Schlüssel (Token) ein.'; return; }
+    $('aSave').disabled = true; $('aSave').textContent = 'Verbinde …';
+    try{
+      await connect(token, repo);
+      store.set(TOKEN_KEY, token); store.set(REPO_KEY, repo);
+      closeAll(); toast('Verbunden ✓ Du kannst jetzt bearbeiten');
+    }catch(err){
+      $('aErr').textContent = {repo:'Repository bitte als „benutzername/repo-name“ angeben.', auth:'Schlüssel oder Repository stimmt nicht.', perm:'Der Schlüssel darf in dieses Repository nicht schreiben.'}[err.message] || 'Verbindung fehlgeschlagen. Bitte nochmal versuchen.';
+    }finally{ $('aSave').disabled=false; $('aSave').textContent='Verbinden'; }
+  });
+
+  function normalize(d){
+    return { title: d.title || 'Meine Wunschliste', intro: d.intro ?? '', items: Array.isArray(d.items) ? d.items.filter(x=>x && typeof x==='object').map(x=>({...x, id: x.id || uid()})) : [] };
+  }
+
+  // ---------- stars ----------
+  (()=>{ const sky=$('sky'); for(let i=0;i<70;i++){ const st=document.createElement('i'); if(Math.random()<.15) st.className='b'; st.style.left=Math.random()*100+'%'; st.style.top=Math.random()*100+'%'; st.style.animationDelay=(Math.random()*4).toFixed(2)+'s'; st.style.animationDuration=(3+Math.random()*4).toFixed(2)+'s'; sky.appendChild(st);} })();
+
+  // ---------- boot ----------
+  (async () => {
+    const savedToken = store.get(TOKEN_KEY), savedRepo = store.get(REPO_KEY);
+    if(savedToken && savedRepo){
+      try{ await connect(savedToken, savedRepo); return; }catch{ store.del(TOKEN_KEY); }
+    }
+    try{
+      const res = await fetch(`${FILE}?t=${Date.now()}`, { cache:'no-store' });
+      if(!res.ok) throw new Error(res.status);
+      state = normalize(await res.json());
+      loaded = true; render();
+    }catch{
+      showStatus('Die Wunschliste konnte nicht geladen werden. Bitte später nochmal versuchen.');
+    }
+    if(location.hash === '#bearbeiten') openAdmin();
+  })();
+})();
+</script>
+</body>
+</html>
