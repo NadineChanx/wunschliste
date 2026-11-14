@@ -1,16 +1,5 @@
 {
   "title": "Meine Wunschliste",
   "intro": "Kleine und große Wünsche – für jeden Anlass.",
-  "items": [
-    {
-      "id": "beispiel1",
-      "title": "Beispiel-Wunsch (kannst du löschen)",
-      "url": "https://www.example.com",
-      "price": 19.99,
-      "note": "So sieht ein Wunsch mit Notiz aus.",
-      "priority": 2,
-      "done": false,
-      "createdAt": 1763090000000
-    }
-  ]
+  "items": []
 }
