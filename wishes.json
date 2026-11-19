@@ -1,5 +1,16 @@
 {
   "title": "Meine Wunschliste",
   "intro": "Kleine und große Wünsche – für jeden Anlass.",
-  "items": []
+  "items": [
+    {
+      "id": "mwnwca9zjs5d4",
+      "title": "The Remarried Empress 2: Die falsche Mätresse.",
+      "url": "https://www.amazon.de/Remarried-Empress-Buchvorlage-limitiertem-Remarried-Empress-Reihe/dp/3426570904/ref=sr_1_3?sr=8-3",
+      "price": 24,
+      "note": "",
+      "priority": 3,
+      "done": false,
+      "createdAt": 1795113687815
+    }
+  ]
 }
